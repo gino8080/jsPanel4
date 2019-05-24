@@ -2,7 +2,7 @@
 /* global jsPanel, module */
 'use strict';
 
-import {jsPanel} from '../../jspanel.js';
+//import {jsPanel} from '../../jspanel.js';
 
 /*
 If option.dragit is enabled on a modal AND an already open panel has option.syncMargins set to true the modal somehow inherits
@@ -18,16 +18,16 @@ if (!jsPanel.modal) {
         date: '2019-01-17 13:54',
 
         defaults: {
-            closeOnEscape:  true,
-            closeOnBackdrop:true,
-            dragit:         false,
+            closeOnEscape: true,
+            closeOnBackdrop: true,
+            dragit: false,
             headerControls: 'closeonly',
-            resizeit:       false,
-            syncMargins:    false
+            resizeit: false,
+            syncMargins: false
         },
 
-        addBackdrop(id) {
-            let modalCount = document.getElementsByClassName('jsPanel-modal-backdrop').length,
+        addBackdrop: function addBackdrop(id) {
+            var modalCount = document.getElementsByClassName('jsPanel-modal-backdrop').length,
                 mb = document.createElement('div');
             mb.id = 'jsPanel-modal-backdrop-' + id;
             if (modalCount === 0) {
@@ -38,36 +38,36 @@ if (!jsPanel.modal) {
             mb.style.zIndex = this.ziModal.next();
             return mb;
         },
-
-        removeBackdrop(id) {
-            let mb = document.getElementById(`jsPanel-modal-backdrop-${id}`);
+        removeBackdrop: function removeBackdrop(id) {
+            var mb = document.getElementById('jsPanel-modal-backdrop-' + id);
             mb.classList.add('jsPanel-modal-backdrop-out');
-            let delay = parseFloat(getComputedStyle(mb).animationDuration) * 1000;
-            window.setTimeout(function() {
+            var delay = parseFloat(getComputedStyle(mb).animationDuration) * 1000;
+            window.setTimeout(function () {
                 document.body.removeChild(mb);
             }, delay);
         },
+        create: function create() {
+            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-        create(options = {}) {
             options.paneltype = 'modal';
             if (!options.id) {
-                options.id = `jsPanel-${jsPanel.idCounter += 1}`;
+                options.id = 'jsPanel-' + (jsPanel.idCounter += 1);
             } else if (typeof options.id === 'function') {
                 options.id = options.id();
             }
 
-            let opts = options,
+            var opts = options,
                 backdrop = this.addBackdrop(opts.id);
             if (options.config) {
                 opts = Object.assign({}, options.config, options);
                 delete opts.config;
             }
-            opts = Object.assign({}, this.defaults, opts, {container: 'window'});
+            opts = Object.assign({}, this.defaults, opts, { container: 'window' });
 
             document.body.append(backdrop);
 
-            let remBackdrop = function (e) {
-                let id = e.detail;
+            var remBackdrop = function remBackdrop(e) {
+                var id = e.detail;
                 if (id === opts.id) {
                     jsPanel.modal.removeBackdrop(id);
                     document.removeEventListener('jspanelclosed', remBackdrop, false);
@@ -76,31 +76,34 @@ if (!jsPanel.modal) {
 
             document.addEventListener('jspanelclosed', remBackdrop, false);
 
-            return jsPanel.create(opts, modal => {
+            return jsPanel.create(opts, function (modal) {
                 modal.style.zIndex = jsPanel.modal.ziModal.next();
                 modal.header.style.cursor = 'default';
                 modal.footer.style.cursor = 'default';
                 // close modal on click in backdrop
                 if (opts.closeOnBackdrop) {
                     jsPanel.pointerup.forEach(function (evt) {
-                        document.getElementById(`jsPanel-modal-backdrop-${opts.id}`).addEventListener(evt, function () {
+                        document.getElementById('jsPanel-modal-backdrop-' + opts.id).addEventListener(evt, function () {
                             modal.close();
                         });
                     });
                 }
             });
-
         }
-
     };
 
-    jsPanel.modal.ziModal = (() => {
-        let val = 10000;
+    jsPanel.modal.ziModal = function () {
+        var val = 10000;
         return {
-            next: function() {
+            next: function next() {
                 return val++;
             }
         };
-    })();
+    }();
+}
 
+// Add CommonJS module exports, so it can be imported using require() in Node.js
+// https://nodejs.org/docs/latest/api/modules.html
+if (typeof module !== 'undefined') {
+    module.exports = jsPanel;
 }

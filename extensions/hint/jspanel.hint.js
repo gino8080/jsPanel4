@@ -2,7 +2,7 @@
 /* global jsPanel */
 'use strict';
 
-import {jsPanel} from '../../jspanel.js';
+//import {jsPanel} from '../../jspanel.js';
 
 if (!jsPanel.hint) {
 
@@ -18,25 +18,30 @@ if (!jsPanel.hint) {
             headerControls: 'closeonly xs'
         },
 
-        create(options = {}) {
+        create: function create() {
+            var options = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+
 
             options.paneltype = 'hint';
 
-            let opts = options;
+            var opts = options;
             if (options.config) {
                 opts = Object.assign({}, options.config, options);
                 delete opts.config;
             }
             opts = Object.assign({}, this.defaults, opts);
 
-            return jsPanel.create(opts, hint => {
+            return jsPanel.create(opts, function (hint) {
                 hint.style.zIndex = 9999;
                 hint.header.style.cursor = 'default';
                 hint.footer.style.cursor = 'default';
             });
-
         }
-
     };
+}
 
+// Add CommonJS module exports, so it can be imported using require() in Node.js
+// https://nodejs.org/docs/latest/api/modules.html
+if (typeof module !== 'undefined') {
+    module.exports = jsPanel;
 }
